@@ -1,0 +1,12 @@
+C:\Users\hisid\Documents\_sample_unit_mod\AtO_Loader\obj\Debug\net48\AtO_Loader.csproj.AssemblyReference.cache
+C:\Users\hisid\Documents\_sample_unit_mod\AtO_Loader\obj\Debug\net48\MyPluginInfo.cs
+C:\Users\hisid\Documents\_sample_unit_mod\AtO_Loader\obj\Debug\net48\AtO_Loader.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\hisid\Documents\_sample_unit_mod\AtO_Loader\obj\Debug\net48\AtO_Loader.AssemblyInfoInputs.cache
+C:\Users\hisid\Documents\_sample_unit_mod\AtO_Loader\obj\Debug\net48\AtO_Loader.AssemblyInfo.cs
+C:\Users\hisid\Documents\_sample_unit_mod\AtO_Loader\obj\Debug\net48\AtO_Loader.csproj.CoreCompileInputs.cache
+C:\Users\hisid\Documents\_sample_unit_mod\AtO_Loader\bin\Debug\net48\AtO_Loader.dll
+C:\Users\hisid\Documents\_sample_unit_mod\AtO_Loader\bin\Debug\net48\AtO_Loader.pdb
+C:\Users\hisid\Documents\_sample_unit_mod\AtO_Loader\bin\Debug\net48\Assembly-CSharp.dll
+C:\Users\hisid\Documents\_sample_unit_mod\AtO_Loader\obj\Debug\net48\AtO_Loader.csproj.CopyComplete
+C:\Users\hisid\Documents\_sample_unit_mod\AtO_Loader\obj\Debug\net48\AtO_Loader.dll
+C:\Users\hisid\Documents\_sample_unit_mod\AtO_Loader\obj\Debug\net48\AtO_Loader.pdb

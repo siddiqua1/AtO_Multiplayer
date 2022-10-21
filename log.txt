@@ -1,0 +1,46 @@
+
+NEED TO ADD TO `roomSlots` etc
+[Error  : Unity Log] IndexOutOfRangeException: Index was outside the bounds of the array.
+Stack trace:
+LobbyManager.DrawLobbyNames () (at <5357e4e2024343ebb5c967f8afd096f8>:0)
+LobbyManager.SetLobbyPlayersData (Photon.Realtime.Player[] _PlayerList) (at <5357e4e2024343ebb5c967f8afd096f8>:0)
+NetworkManager.SetLobbyPlayersData () (at <5357e4e2024343ebb5c967f8afd096f8>:0)
+NetworkManager.SetPlayerPosition (System.String playerNickReal, System.String playerNick, System.String gameVersion) (at <5357e4e2024343ebb5c967f8afd096f8>:0)
+System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) (at <6073cf49ed704e958b8a66d540dea948>:0)
+Rethrow as TargetInvocationException: Exception has been thrown by the target of an invocation.
+System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) (at <6073cf49ed704e958b8a66d540dea948>:0)
+System.Reflection.MethodBase.Invoke (System.Object obj, System.Object[] parameters) (at <6073cf49ed704e958b8a66d540dea948>:0)
+Photon.Pun.PhotonNetwork.ExecuteRpc (ExitGames.Client.Photon.Hashtable rpcData, Photon.Realtime.Player sender) (at <9b0b3089b337428ea6599a74353a7333>:0)
+Photon.Pun.PhotonNetwork.RPC (Photon.Pun.PhotonView view, System.String methodName, Photon.Pun.RpcTarget target, Photon.Realtime.Player player, System.Boolean encrypt, System.Object[] parameters) (at <9b0b3089b337428ea6599a74353a7333>:0)
+Photon.Pun.PhotonNetwork.RPC (Photon.Pun.PhotonView view, System.String methodName, Photon.Pun.RpcTarget target, System.Boolean encrypt, System.Object[] parameters) (at <9b0b3089b337428ea6599a74353a7333>:0)
+Photon.Pun.PhotonView.RPC (System.String methodName, Photon.Pun.RpcTarget target, System.Object[] parameters) (at <9b0b3089b337428ea6599a74353a7333>:0)
+NetworkManager.OnCreatedRoom () (at <5357e4e2024343ebb5c967f8afd096f8>:0)
+Photon.Realtime.MatchMakingCallbacksContainer.OnCreatedRoom () (at <0c065df9adff46e69dbba151ecd5c298>:0)
+Photon.Realtime.LoadBalancingClient.OnEvent (ExitGames.Client.Photon.EventData photonEvent) (at <0c065df9adff46e69dbba151ecd5c298>:0)
+ExitGames.Client.Photon.PeerBase.DeserializeMessageAndCallback (ExitGames.Client.Photon.StreamBuffer stream) (at <4c05f01c27d1415bafcda4c1ab7160e0>:0)
+ExitGames.Client.Photon.EnetPeer.DispatchIncomingCommands () (at <4c05f01c27d1415bafcda4c1ab7160e0>:0)
+ExitGames.Client.Photon.PhotonPeer.DispatchIncomingCommands () (at <4c05f01c27d1415bafcda4c1ab7160e0>:0)
+Photon.Pun.PhotonHandler.Dispatch () (at <9b0b3089b337428ea6599a74353a7333>:0)
+Rethrow as AggregateException: Caught 1 exception(s) in methods called by DispatchIncomingCommands(). Rethrowing first only (see above). (Exception has been thrown by the target of an invocation.)
+Photon.Pun.PhotonHandler.Dispatch () (at <9b0b3089b337428ea6599a74353a7333>:0)
+Photon.Pun.PhotonHandler.FixedUpdate () (at <9b0b3089b337428ea6599a74353a7333>:0)
+
+[Info   : Unity Log] SetGameStatus NewGame
+[Info   : Unity Log] ShowJoin
+[Info   : Unity Log] InitLobby
+[Info   :   Console] Object 0 has position <-8.406, 2.574, 0>
+[Info   :   Console] Object 1 has position <-8.406, 1.774, 0>
+[Info   :   Console] Object 2 has position <-8.406, 0.974, 0>
+[Info   :   Console] Object 3 has position <-8.406, 0.1740007, 0>
+[Info   :   Console] Button Launch has position <-5.806001, -0.9259996, 0>
+[Info   :   Console] Button Steam has position <-8.926001, -0.9259996, 0>
+[Info   :   Console] Adding additional room slots
+[Info   :   Console] Adding additional room slots
+[Info   :   Console] Adding additional room slots
+[Info   : Unity Log] ShowRoom
+[Info   :   Console] Object 0 has position <-8.406, 2.574, 0>
+[Info   :   Console] Object 1 has position <-8.406, 1.774, 0>
+[Info   :   Console] Object 2 has position <-8.406, 0.974, 0>
+[Info   :   Console] Object 3 has position <-8.406, 0.1740007, 0>
+[Info   :   Console] Button Launch has position <-5.806001, -0.9259996, 10>
+[Info   :   Console] Button Steam has position <-8.926001, -0.9259996, 10>
