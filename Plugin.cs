@@ -26,9 +26,36 @@ public class Plugin : BaseUnityPlugin
         harmony.PatchAll(typeof(LobbyNames));
         harmony.PatchAll(typeof(SteamLobby));
         harmony.PatchAll(typeof(AddBoxes));
+        harmony.PatchAll(typeof(BoxesWithHeroes));
     }
 
     //AllBoxWithHeroes
+
+    [HarmonyPatch(typeof(HeroSelectionManager), "AllBoxWithHeroes")]
+    class BoxesWithHeroes
+    {
+        [HarmonyPrefix]
+        static bool setpatch(ref bool __result, Dictionary<GameObject, bool> ___boxFilled)
+        {
+            //gives back number of portraits
+            int num = 0;
+            if (___boxFilled.Count > 0)
+            {
+                foreach (GameObject gameObject in ___boxFilled.Keys)
+                {
+                    if (___boxFilled[gameObject])
+                    {
+                        num++;
+                    }
+                }
+                //return num == 4;
+            }
+            //four childs are static, so if childs - 4 = 2 * portraits we have them all filled
+            int childCnt = GameObject.Find("/BoxCharacters").transform.childCount;
+            __result = (2 * num == childCnt - 4);
+            return false;
+        }
+    }
 
     [HarmonyPatch(typeof(HeroSelectionManager), "Awake")]
     class AddBoxes
