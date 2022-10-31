@@ -29,7 +29,14 @@ public class Plugin : BaseUnityPlugin
         harmony.PatchAll(typeof(BoxesWithHeroes));
     }
 
-    //AllBoxWithHeroes
+    [HarmonyPatch(typeof(BoxSelection), "Awake")]
+    class AdditionalNames
+    {
+        static void setpatch() 
+        { 
+            //TODO:
+        }
+    }
 
     [HarmonyPatch(typeof(HeroSelectionManager), "AllBoxWithHeroes")]
     class BoxesWithHeroes
@@ -77,6 +84,8 @@ public class Plugin : BaseUnityPlugin
         }
     }
 
+
+
     [HarmonyPatch(typeof(SteamManager), "InviteSteam")]
     class SteamLobby
     {
@@ -105,6 +114,12 @@ public class Plugin : BaseUnityPlugin
     [HarmonyPatch(typeof(LobbyManager), "DrawLobbyNames")]
     class LobbyNames
     {
+
+        [HarmonyPostfix]
+        static void forceRoom(ref Transform ___buttonLaunch) {
+            ___buttonLaunch.gameObject.SetActive(true);
+        }
+
         [HarmonyPrefix]
         static void setpatch(ref TMP_Text[] ___roomSlots, ref Image[] ___roomSlotsImage, ref Transform[]___roomSlotsKick, ref Transform ___buttonLaunch, ref Transform ___buttonSteam)
         {
