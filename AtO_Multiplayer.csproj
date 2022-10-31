@@ -37,6 +37,12 @@
     <Reference Include="netstandard">
       <HintPath>libs\netstandard.dll</HintPath>
     </Reference>
+    <Reference Include="PhotonRealtime">
+      <HintPath>libs\PhotonRealtime.dll</HintPath>
+    </Reference>
+    <Reference Include="PhotonUnityNetworking">
+      <HintPath>libs\PhotonUnityNetworking.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>Unity.TextMeshPro.dll</HintPath>
     </Reference>

@@ -16,3 +16,5 @@ B:\Documents\Projects\AoT_MultiplayerMod\AtO_Multiplayer\obj\Debug\net48\AtO_Mul
 B:\Documents\Projects\AoT_MultiplayerMod\AtO_Multiplayer\bin\Debug\net48\Steamworks.Core.dll
 B:\Documents\Projects\AoT_MultiplayerMod\AtO_Multiplayer\bin\Debug\net48\System.Diagnostics.DiagnosticSource.dll
 B:\Documents\Projects\AoT_MultiplayerMod\AtO_Multiplayer\bin\Debug\net48\Facepunch.Steamworks.Win64.dll
+B:\Documents\Projects\AoT_MultiplayerMod\AtO_Multiplayer\bin\Debug\net48\PhotonRealtime.dll
+B:\Documents\Projects\AoT_MultiplayerMod\AtO_Multiplayer\bin\Debug\net48\PhotonUnityNetworking.dll

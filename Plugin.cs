@@ -8,9 +8,15 @@ using UnityEngine.UI;
 using TMPro;
 using Steamworks;
 using Steamworks.Data;
+using Photon.Realtime;
+using Photon.Pun;
 using Image = UnityEngine.UI.Image;
 
 namespace AtO_Multiplayer;
+
+public class potato {
+    public int player = 0;
+}
 
 [BepInPlugin(modGUID, modName, ModVersion)]
 public class Plugin : BaseUnityPlugin
@@ -27,6 +33,7 @@ public class Plugin : BaseUnityPlugin
         harmony.PatchAll(typeof(SteamLobby));
         harmony.PatchAll(typeof(AddBoxes));
         harmony.PatchAll(typeof(BoxesWithHeroes));
+        harmony.PatchAll(typeof(DrawBoxSelectionNames));
     }
 
     [HarmonyPatch(typeof(BoxSelection), "Awake")]
@@ -35,6 +42,55 @@ public class Plugin : BaseUnityPlugin
         static void setpatch() 
         { 
             //TODO:
+        }
+    }
+
+    [HarmonyPatch(typeof(HeroSelectionManager), "DrawBoxSelectionNames")]
+    class DrawBoxSelectionNames
+    {
+        [HarmonyPrefix]
+        static bool setpatch(ref BoxSelection[] ___boxSelection)
+        {
+            int num = 0;
+            System.Console.WriteLine($"Accessing boxSelection of length {___boxSelection.Length}");
+            foreach (Player player in NetworkManager.Instance.PlayerList)
+            {
+                System.Console.WriteLine($"Adding player {player.NickName} to all boxSelections");
+                for (int j = 0; j < ___boxSelection.Length; j++)
+                {
+                    ___boxSelection[j].ShowPlayer(num);
+                    ___boxSelection[j].SetPlayerPosition(num, player.NickName);
+                }
+                num++;
+            }
+            for (int k = num; k < (int)PhotonNetwork.CurrentRoom.MaxPlayers; k++)
+            {
+                for (int l = 0; l < ___boxSelection.Length; l++)
+                {
+                    ___boxSelection[l].SetPlayerPosition(k, "");
+                }
+            }
+            foreach (Player player2 in NetworkManager.Instance.PlayerList)
+            {
+                string playerNickReal = NetworkManager.Instance.GetPlayerNickReal(player2.NickName);
+                if (playerNickReal == NetworkManager.Instance.Owner0)
+                {
+                    HeroSelectionManager.Instance.AssignPlayerToBox(player2.NickName, 0);
+                }
+                if (playerNickReal == NetworkManager.Instance.Owner1)
+                {
+                    HeroSelectionManager.Instance.AssignPlayerToBox(player2.NickName, 1);
+                }
+                if (playerNickReal == NetworkManager.Instance.Owner2)
+                {
+                    HeroSelectionManager.Instance.AssignPlayerToBox(player2.NickName, 2);
+                }
+                if (playerNickReal == NetworkManager.Instance.Owner3)
+                {
+                    HeroSelectionManager.Instance.AssignPlayerToBox(player2.NickName, 3);
+                }
+            }
+            return false;
         }
     }
 
@@ -68,18 +124,44 @@ public class Plugin : BaseUnityPlugin
     class AddBoxes
     {
         [HarmonyPostfix]
-        static void setpatch()
+        static void setpatch(ref GameObject[] ___boxGO)
         {
             float spacer = -2.4f;
             Transform boxChar = GameObject.Find("/BoxCharacters").transform;
+
+            Array.Resize<GameObject>(ref ___boxGO, 8);
+
+            System.Console.WriteLine($"Length of boxGO is {___boxGO.Length}");
+
+
+
+
             for (int i = 0; i < 4; i++)
             {
-                GameObject tmpBox = Instantiate(boxChar.GetChild(4 + i).gameObject);
+                //TODO: before duplicating, update the boxPlayer array under boxSelection, should be moved down .25 
+                GameObject original = boxChar.GetChild(4 + i).gameObject;
+                BoxSelection select = original.GetComponent<BoxSelection>();
+                Array.Resize<BoxPlayer>(ref select.boxPlayer, 8);
+                for (int j = 0; j < 4; j++)
+                {
+                    GameObject selectTmp = Instantiate(original.transform.GetChild(6).transform.GetChild(5).gameObject);
+                    selectTmp.transform.SetParent(original.transform.GetChild(6).transform, true);
+                    selectTmp.name = $"Box Player ({4 + j})";
+                    selectTmp.transform.localScale = original.transform.GetChild(6).transform.GetChild(5).transform.localScale;
+                    selectTmp.transform.position = original.transform.GetChild(6).transform.GetChild(5).transform.position + new Vector3(0, -0.25f * (j + 1), 0);
+                    select.boxPlayer[4 + j] = selectTmp.GetComponent<BoxPlayer>();
+                    selectTmp.gameObject.SetActive(false);
+                }
+
+
+                System.Console.WriteLine($"Box {i} has up to {select.boxPlayer.Length} selections possible");
+                GameObject tmpBox = Instantiate(original);
                 tmpBox.name = $"Box_{4 + i}";
-                tmpBox.transform.parent = boxChar;
+                tmpBox.transform.SetParent(boxChar.transform, true);
                 tmpBox.transform.position = boxChar.GetChild(4 + i).position + new Vector3(0, spacer, 0);
                 tmpBox.gameObject.SetActive(false);
                 tmpBox.gameObject.SetActive(true);
+                ___boxGO[4 + i] = tmpBox;
             }
         }
     }

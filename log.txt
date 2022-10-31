@@ -44,3 +44,12 @@ Photon.Pun.PhotonHandler.FixedUpdate () (at <9b0b3089b337428ea6599a74353a7333>:0
 [Info   :   Console] Object 3 has position <-8.406, 0.1740007, 0>
 [Info   :   Console] Button Launch has position <-5.806001, -0.9259996, 10>
 [Info   :   Console] Button Steam has position <-8.926001, -0.9259996, 10>
+
+
+[Error  : Unity Log] IndexOutOfRangeException: Index was outside the bounds of the array.
+Stack trace:
+BoxSelection.SetPlayerPosition (System.Int32 position, System.String playerName) (at <e4279324077447e4a1db8e988af5a1b0>:0)
+AtO_Multiplayer.Plugin+DrawBoxSelectionNames.setpatch (BoxSelection[]& ___boxSelection) (at <7cd0693cb5f04aab86c4fdc210ff7aa0>:0)
+(wrapper dynamic-method) HeroSelectionManager.DMD<HeroSelectionManager::DrawBoxSelectionNames>(HeroSelectionManager)
+HeroSelectionManager+<StartCo>d__88.MoveNext () (at <e4279324077447e4a1db8e988af5a1b0>:0)
+UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumerator, System.IntPtr returnValueAddress) (at <3b4bf2a7b2b14fdda08f1ba5f13c96f5>:0)
