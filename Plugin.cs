@@ -39,6 +39,7 @@ public class Plugin : BaseUnityPlugin
         harmony.PatchAll(typeof(CreateRoom));
         harmony.PatchAll(typeof(CreateTeam));
         //harmony.PatchAll(typeof(CreateTeamNPC));
+        harmony.PatchAll(typeof(GenerateHeroes));
     }
 
     [HarmonyPatch(typeof(BoxSelection), "Awake")]
@@ -84,28 +85,36 @@ public class Plugin : BaseUnityPlugin
                     {
                         hero.HpCurrent = 1;
                     }
+                    System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 1");
                     if (AtOManager.Instance.combatGameCode == "" || ___teamHeroItemsFromTurnSave != null)
                     {
-                        ___heroLifeArr[i] = hero.HpCurrent;
+                        ___heroLifeArr[i] = hero.HpCurrent; //TODO: Index out of bounds
                         List<string> list = new List<string>();
                         list.Add(hero.Weapon);
                         list.Add(hero.Armor);
                         list.Add(hero.Jewelry);
                         list.Add(hero.Accesory);
                         list.Add(hero.Pet);
+                        System.Console.WriteLine($"[ATO GenerateHeroes] VIBE CHECK");
                         if (!___heroBeginItems.ContainsKey(i))
                         {
+                            System.Console.WriteLine($"[ATO GenerateHeroes] ADD CHECK");
                             ___heroBeginItems.Add(i, list);
+                            System.Console.WriteLine($"[ATO GenerateHeroes] ADD POG");
                         }
                         else
                         {
+                            System.Console.WriteLine($"[ATO GenerateHeroes] ACCESS CHECK");
                             ___heroBeginItems[i] = list;
+                            System.Console.WriteLine($"[ATO GenerateHeroes] ACCESS POG");
                         }
                     }
+                    System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 2");
                     if (AtOManager.Instance.combatGameCode != "")
                     {
                         if (___teamHeroItemsFromTurnSave != null)
                         {
+                            System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 3");
                             hero.Weapon = ___teamHeroItemsFromTurnSave[i * 5];
                             hero.Armor = ___teamHeroItemsFromTurnSave[i * 5 + 1];
                             hero.Jewelry = ___teamHeroItemsFromTurnSave[i * 5 + 2];
@@ -114,6 +123,7 @@ public class Plugin : BaseUnityPlugin
                         }
                         else if (___currentRound == 0 && ___heroBeginItems != null && ___heroBeginItems.ContainsKey(i) && ___heroBeginItems[i] != null)
                         {
+                            System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 4");
                             List<string> list2 = ___heroBeginItems[i];
                             hero.Weapon = list2[0];
                             hero.Armor = list2[1];
@@ -123,6 +133,7 @@ public class Plugin : BaseUnityPlugin
                         }
                         else if (___currentRound > 0 && ___heroDestroyedItemsInThisTurn.ContainsKey(i))
                         {
+                            System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 5");
                             if (___heroDestroyedItemsInThisTurn[i].ContainsKey("weapon"))
                             {
                                 hero.Weapon = ___heroDestroyedItemsInThisTurn[i]["weapon"];
@@ -144,7 +155,8 @@ public class Plugin : BaseUnityPlugin
                                 hero.Pet = ___heroDestroyedItemsInThisTurn[i]["pet"];
                             }
                         }
-                    } 
+                    }
+                    System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 6");
                     hero.Alive = true;
                     hero.InternalId = MatchManager.Instance.GetRandomString("default");
                     hero.Id = hero.HeroData.HeroSubClass.Id + "_" + hero.InternalId;
@@ -153,6 +165,7 @@ public class Plugin : BaseUnityPlugin
                     gameObject.name = hero.Id;
                     ___targetTransformDict.Add(hero.Id, gameObject.transform);
                     hero.ResetDataForNewCombat(___currentGameCode == "");
+                    System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 7");
                     hero.SetHeroIndex(i);
                     hero.HeroItem = gameObject.GetComponent<HeroItem>();
                     hero.HeroItem.HeroData = hero.HeroData;
@@ -169,6 +182,7 @@ public class Plugin : BaseUnityPlugin
                     ___HeroHand[i] = new List<string>();
                     ___HeroDeckDiscard[i] = new List<string>();
                     ___HeroDeckVanish[i] = new List<string>();
+                    System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 8");
                     array[i] = hero;
                     num++;
                     CardData pet = hero.GetPet();
