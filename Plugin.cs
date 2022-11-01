@@ -40,6 +40,7 @@ public class Plugin : BaseUnityPlugin
         harmony.PatchAll(typeof(CreateTeam));
         //harmony.PatchAll(typeof(CreateTeamNPC));
         harmony.PatchAll(typeof(GenerateHeroes));
+        harmony.PatchAll(typeof(InitializeVars));
     }
 
     [HarmonyPatch(typeof(BoxSelection), "Awake")]
@@ -48,6 +49,50 @@ public class Plugin : BaseUnityPlugin
         static void setpatch() 
         { 
             //TODO:
+        }
+    }
+
+    [HarmonyPatch(typeof(MatchManager), "InitializeVars")]
+    class InitializeVars
+    {
+        [HarmonyPrefix]
+        static bool setup(MatchManager __instance) {
+            Debug.Log("Initialize Variables");
+            int betterNum = 8;
+            __instance.reloadingGame = false;
+            __instance.heroIndexWaitingForAddDiscard = -1;
+            __instance.HeroDeck = new List<string>[betterNum];
+            __instance.HeroDeckDiscard = new List<string>[betterNum];
+            __instance.HeroDeckVanish = new List<string>[betterNum];
+            __instance.HeroHand = new List<string>[betterNum];
+            __instance.NPCDeck = new List<string>[betterNum];
+            __instance.NPCDeckDiscard = new List<string>[betterNum];
+            __instance.NPCHand = new List<string>[betterNum];
+            __instance.cardDictionary = new Dictionary<string, CardData>();
+            __instance.castedCards = new List<string>();
+            __instance.castedCards.Add("");
+            __instance.CICardDiscard = new List<CardItem>();
+            __instance.CICardAddcard = new List<CardItem>();
+            __instance.npcCardsCasted = new Dictionary<string, List<string>>();
+            __instance.canInstaCastDict = new Dictionary<string, bool>();
+            if (!__instance.turnLoadedBySave)
+            {
+                AtOManager.Instance.InitCombatStatsCurrent();
+            }
+            for (int i = 0; i < betterNum; i++)
+            {
+                __instance.HeroDeck[i] = new List<string>();
+            }
+            for (int j = 0; j < betterNum; j++)
+            {
+                __instance.NPCDeck[j] = new List<string>();
+            }
+            __instance.itemTimeout = new float[10];
+            for (int k = 0; k < __instance.itemTimeout.Length; k++)
+            {
+                __instance.itemTimeout[k] = 0f;
+            }
+            return false;
         }
     }
 
@@ -72,6 +117,7 @@ public class Plugin : BaseUnityPlugin
                 ref List<string>[] ___HeroDeckVanish
             ) 
         {
+            Array.Resize<int>(ref ___heroLifeArr, 8);
             int num = 0;
             System.Console.WriteLine($"[ATO GenerateHeroes] Length of teamHero: {___TeamHero.Length}");
             Hero[] array = new Hero[___TeamHero.Length];
@@ -167,6 +213,7 @@ public class Plugin : BaseUnityPlugin
                     hero.ResetDataForNewCombat(___currentGameCode == "");
                     System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 7");
                     hero.SetHeroIndex(i);
+                    System.Console.WriteLine($"[ATO GenerateHeroes] vibes");
                     hero.HeroItem = gameObject.GetComponent<HeroItem>();
                     hero.HeroItem.HeroData = hero.HeroData;
                     hero.HeroItem.Init(hero);
