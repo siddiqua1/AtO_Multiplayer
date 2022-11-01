@@ -34,6 +34,11 @@ public class Plugin : BaseUnityPlugin
         harmony.PatchAll(typeof(AddBoxes));
         harmony.PatchAll(typeof(BoxesWithHeroes));
         harmony.PatchAll(typeof(DrawBoxSelectionNames));
+        harmony.PatchAll(typeof(BeginAdventure));
+        harmony.PatchAll(typeof(AssignHeroPlayerPositionOwner));
+        harmony.PatchAll(typeof(CreateRoom));
+        harmony.PatchAll(typeof(CreateTeam));
+        //harmony.PatchAll(typeof(CreateTeamNPC));
     }
 
     [HarmonyPatch(typeof(BoxSelection), "Awake")]
@@ -42,6 +47,244 @@ public class Plugin : BaseUnityPlugin
         static void setpatch() 
         { 
             //TODO:
+        }
+    }
+
+    [HarmonyPatch(typeof(MatchManager), "GenerateHeroes")]
+    class GenerateHeroes
+    {
+        [HarmonyPrefix]
+        static bool setpatch(
+                MatchManager __instance,
+                ref Hero[] ___TeamHero,
+                ref bool ___tutorialCombat,
+                ref List<string> ___teamHeroItemsFromTurnSave,
+                ref int[] ___heroLifeArr,
+                ref Dictionary<int, List<string>> ___heroBeginItems,
+                ref int ___currentRound,
+                ref Dictionary<int, Dictionary<string, string>> ___heroDestroyedItemsInThisTurn,
+                ref GameObject ___heroPrefab,
+                ref Dictionary<string, Transform> ___targetTransformDict,
+                ref string ___currentGameCode,
+                ref List<string>[] ___HeroHand,
+                ref List<string>[] ___HeroDeckDiscard,
+                ref List<string>[] ___HeroDeckVanish
+            ) 
+        {
+            int num = 0;
+            System.Console.WriteLine($"[ATO GenerateHeroes] Length of teamHero: {___TeamHero.Length}");
+            Hero[] array = new Hero[___TeamHero.Length];
+            for (int i = 0; i < ___TeamHero.Length; i++)
+            {
+                System.Console.WriteLine($"[ATO GenerateHeroes] Iteration {i}");
+                if (___TeamHero[i] != null && (!___tutorialCombat || (i != 1 && i != 2)))
+                {
+                    Hero hero = ___TeamHero[i];
+                    if (hero.HpCurrent <= 0)
+                    {
+                        hero.HpCurrent = 1;
+                    }
+                    if (AtOManager.Instance.combatGameCode == "" || ___teamHeroItemsFromTurnSave != null)
+                    {
+                        ___heroLifeArr[i] = hero.HpCurrent;
+                        List<string> list = new List<string>();
+                        list.Add(hero.Weapon);
+                        list.Add(hero.Armor);
+                        list.Add(hero.Jewelry);
+                        list.Add(hero.Accesory);
+                        list.Add(hero.Pet);
+                        if (!___heroBeginItems.ContainsKey(i))
+                        {
+                            ___heroBeginItems.Add(i, list);
+                        }
+                        else
+                        {
+                            ___heroBeginItems[i] = list;
+                        }
+                    }
+                    if (AtOManager.Instance.combatGameCode != "")
+                    {
+                        if (___teamHeroItemsFromTurnSave != null)
+                        {
+                            hero.Weapon = ___teamHeroItemsFromTurnSave[i * 5];
+                            hero.Armor = ___teamHeroItemsFromTurnSave[i * 5 + 1];
+                            hero.Jewelry = ___teamHeroItemsFromTurnSave[i * 5 + 2];
+                            hero.Accesory = ___teamHeroItemsFromTurnSave[i * 5 + 3];
+                            hero.Pet = ___teamHeroItemsFromTurnSave[i * 5 + 4];
+                        }
+                        else if (___currentRound == 0 && ___heroBeginItems != null && ___heroBeginItems.ContainsKey(i) && ___heroBeginItems[i] != null)
+                        {
+                            List<string> list2 = ___heroBeginItems[i];
+                            hero.Weapon = list2[0];
+                            hero.Armor = list2[1];
+                            hero.Jewelry = list2[2];
+                            hero.Accesory = list2[3];
+                            hero.Pet = list2[4];
+                        }
+                        else if (___currentRound > 0 && ___heroDestroyedItemsInThisTurn.ContainsKey(i))
+                        {
+                            if (___heroDestroyedItemsInThisTurn[i].ContainsKey("weapon"))
+                            {
+                                hero.Weapon = ___heroDestroyedItemsInThisTurn[i]["weapon"];
+                            }
+                            if (___heroDestroyedItemsInThisTurn[i].ContainsKey("armor"))
+                            {
+                                hero.Armor = ___heroDestroyedItemsInThisTurn[i]["armor"];
+                            }
+                            if (___heroDestroyedItemsInThisTurn[i].ContainsKey("jewelry"))
+                            {
+                                hero.Jewelry = ___heroDestroyedItemsInThisTurn[i]["jewelry"];
+                            }
+                            if (___heroDestroyedItemsInThisTurn[i].ContainsKey("accesory"))
+                            {
+                                hero.Accesory = ___heroDestroyedItemsInThisTurn[i]["accesory"];
+                            }
+                            if (___heroDestroyedItemsInThisTurn[i].ContainsKey("pet"))
+                            {
+                                hero.Pet = ___heroDestroyedItemsInThisTurn[i]["pet"];
+                            }
+                        }
+                    } 
+                    hero.Alive = true;
+                    hero.InternalId = MatchManager.Instance.GetRandomString("default");
+                    hero.Id = hero.HeroData.HeroSubClass.Id + "_" + hero.InternalId;
+                    hero.Position = num;
+                    GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(___heroPrefab, Vector3.zero, Quaternion.identity, __instance.GO_Heroes.transform);
+                    gameObject.name = hero.Id;
+                    ___targetTransformDict.Add(hero.Id, gameObject.transform);
+                    hero.ResetDataForNewCombat(___currentGameCode == "");
+                    hero.SetHeroIndex(i);
+                    hero.HeroItem = gameObject.GetComponent<HeroItem>();
+                    hero.HeroItem.HeroData = hero.HeroData;
+                    hero.HeroItem.Init(hero);
+                    hero.HeroItem.SetPosition(true, -10);
+                    if (AtOManager.Instance.CharacterHavePerk(hero.SubclassName, "mainperkmark1a") && !hero.AuracurseImmune.Contains("mark"))
+                    {
+                        hero.AuracurseImmune.Add("mark");
+                    }
+                    if (AtOManager.Instance.CharacterHavePerk(hero.SubclassName, "mainperkinspire0c") && !hero.AuracurseImmune.Contains("stress"))
+                    {
+                        hero.AuracurseImmune.Add("stress");
+                    }
+                    ___HeroHand[i] = new List<string>();
+                    ___HeroDeckDiscard[i] = new List<string>();
+                    ___HeroDeckVanish[i] = new List<string>();
+                    array[i] = hero;
+                    num++;
+                    CardData pet = hero.GetPet();
+                    if (pet != null)
+                    {
+                        MatchManager.Instance.CreatePet(pet, gameObject, hero);
+                    }
+                }
+            }
+            ___TeamHero = new Hero[array.Length];
+            for (int j = 0; j < array.Length; j++)
+            {
+                ___TeamHero[j] = array[j];
+            }
+            ___teamHeroItemsFromTurnSave = null;
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(AtOManager), "CreateTeam")]
+    class CreateTeam
+    {
+        [HarmonyPrefix]
+        static bool setpatch(ref Hero[] ___teamAtO)
+        {
+            ___teamAtO = new Hero[8];
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(AtOManager), "CreateTeamNPC")]
+    class CreateTeamNPC
+    {
+        [HarmonyPrefix]
+        static bool setpatch(ref string[] ___teamNPCAtO)
+        {
+            ___teamNPCAtO = new string[8];
+            return false;
+        }
+    }
+
+
+    [HarmonyPatch(typeof(NetworkManager), "CreateRoom")]
+    class CreateRoom
+    {
+        [HarmonyPostfix]
+        static void setpatch(ref string[] ___PlayerHeroPositionOwner) {
+            ___PlayerHeroPositionOwner = new string[8];
+        }
+    }
+
+    [HarmonyPatch(typeof(NetworkManager), "AssignHeroPlayerPositionOwner")]
+    class AssignHeroPlayerPositionOwner
+    {
+        [HarmonyPrefix]
+        static bool setpatch(ref int id, ref string nickName, ref string[] ___PlayerHeroPositionOwner)
+        {
+            if (___PlayerHeroPositionOwner == null)
+            {
+                ___PlayerHeroPositionOwner = new string[8];
+            }
+            ___PlayerHeroPositionOwner[id] = nickName;
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(HeroSelectionManager), "BeginAdventure")]
+    class BeginAdventure
+    {
+        [HarmonyPrefix]
+        static bool setpatch(
+            ref BotonGeneric ___botonBegin, 
+            ref Dictionary<GameObject, HeroSelection> ___boxHero, 
+            ref GameObject[] ___boxGO,
+            ref Dictionary<string, List<string>> ___playerHeroPerksDict,
+            ref int ___ngValue,
+            ref string ___ngCorruptors,
+            ref int ___obeliskMadnessValue
+            )
+        {
+            ___botonBegin.gameObject.SetActive(false);
+            if (!GameManager.Instance.IsMultiplayer() || (GameManager.Instance.IsMultiplayer() && NetworkManager.Instance.IsMaster()))
+            {
+                if (GameManager.Instance.GameStatus == Enums.GameStatus.LoadGame)
+                {
+                    AtOManager.Instance.DoLoadGameFromMP();
+                    return false;
+                }
+                string[] array = new string[8];
+                for (int i = 0; i < ___boxHero.Count; i++)
+                {
+                    array[i] = ___boxHero[___boxGO[i]].GetSubclassName();
+                }
+                if (!GameManager.Instance.IsMultiplayer() && !GameManager.Instance.IsWeeklyChallenge())
+                {
+                    PlayerManager.Instance.LastUsedTeam = new string[4];
+                    for (int j = 0; j < 4; j++)
+                    {
+                        PlayerManager.Instance.LastUsedTeam[j] = array[j].ToLower();
+                    }
+                    //SaveManager.SavePlayerData(false);
+                }
+                if (!GameManager.Instance.IsObeliskChallenge())
+                {
+                    AtOManager.Instance.SetPlayerPerks(___playerHeroPerksDict, array);
+                    AtOManager.Instance.SetNgPlus(___ngValue);
+                    AtOManager.Instance.SetMadnessCorruptors(___ngCorruptors);
+                }
+                else if (!GameManager.Instance.IsWeeklyChallenge())
+                {
+                    AtOManager.Instance.SetObeliskMadness(___obeliskMadnessValue);
+                }
+                AtOManager.Instance.SetTeamFromArray(array);
+                AtOManager.Instance.BeginAdventure();
+            }
+            return false;
         }
     }
 
@@ -132,9 +375,6 @@ public class Plugin : BaseUnityPlugin
             Array.Resize<GameObject>(ref ___boxGO, 8);
 
             System.Console.WriteLine($"Length of boxGO is {___boxGO.Length}");
-
-
-
 
             for (int i = 0; i < 4; i++)
             {
