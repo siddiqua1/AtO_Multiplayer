@@ -53,3 +53,17 @@ AtO_Multiplayer.Plugin+DrawBoxSelectionNames.setpatch (BoxSelection[]& ___boxSel
 (wrapper dynamic-method) HeroSelectionManager.DMD<HeroSelectionManager::DrawBoxSelectionNames>(HeroSelectionManager)
 HeroSelectionManager+<StartCo>d__88.MoveNext () (at <e4279324077447e4a1db8e988af5a1b0>:0)
 UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumerator, System.IntPtr returnValueAddress) (at <3b4bf2a7b2b14fdda08f1ba5f13c96f5>:0)
+
+
+[Error  : Unity Log] IndexOutOfRangeException: Index was outside the bounds of the array.
+Stack trace:
+Character.ModifyHp (System.Int32 _hp, System.Boolean _includeInStats, System.Boolean _refreshHP) (at <e4279324077447e4a1db8e988af5a1b0>:0)
+Character.PercentHeal (System.Single _healPercent, System.Boolean _includeInStats) (at <e4279324077447e4a1db8e988af5a1b0>:0)
+Item.DoItemData (Character target, System.String itemName, System.Int32 auxInt, CardData cardItem, System.String itemType, ItemData itemData, Character character, System.Int32 order, System.String castedCardId) (at <e4279324077447e4a1db8e988af5a1b0>:0)
+Item.DoItem (Enums+EventActivation _theEvent, CardData _cardData, System.String _item, Character _character, Character _target, System.Int32 _auxInt, System.String _auxString, System.Int32 order, CardData castedCard, System.Boolean onlyCheckItemActivation) (at <e4279324077447e4a1db8e988af5a1b0>:0)
+Character.DoItem (Enums+EventActivation theEvent, CardData cardData, System.String item, Character target, System.Int32 auxInt, System.String auxString, System.Int32 order, CardData castedCard) (at <e4279324077447e4a1db8e988af5a1b0>:0)
+MatchManager+<DoItemCo>d__584.MoveNext () (at <e4279324077447e4a1db8e988af5a1b0>:0)
+UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumerator, System.IntPtr returnValueAddress) (at <3b4bf2a7b2b14fdda08f1ba5f13c96f5>:0)
+
+
+

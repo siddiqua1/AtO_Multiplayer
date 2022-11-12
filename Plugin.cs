@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.IO;
 using BepInEx;
 using HarmonyLib;
@@ -41,6 +42,9 @@ public class Plugin : BaseUnityPlugin
         //harmony.PatchAll(typeof(CreateTeamNPC));
         harmony.PatchAll(typeof(GenerateHeroes));
         harmony.PatchAll(typeof(InitializeVars));
+        harmony.PatchAll(typeof(GenerateDecks));
+        harmony.PatchAll(typeof(ShareTeam));
+        harmony.PatchAll(typeof(InitCombatStats));
     }
 
     [HarmonyPatch(typeof(BoxSelection), "Awake")]
@@ -49,6 +53,102 @@ public class Plugin : BaseUnityPlugin
         static void setpatch() 
         { 
             //TODO:
+        }
+    }
+
+    [HarmonyPatch(typeof(MatchManager), "GenerateDecks")]
+    class GenerateDecks
+    {
+        [HarmonyPrefix]
+        static bool setpatch(MatchManager __instance) {
+            List<string>[] array = new List<string>[8];
+            for (int i = 0; i < __instance.TeamHero.Length; i++)
+            {
+                System.Console.WriteLine($"[ATO GenerateDecks] Iteration {i + 1}");
+                if (__instance.TeamHero[i] != null)
+                {
+                    array[i] = new List<string>();
+                    List<string> list = __instance.TeamHero[i].Cards;
+                    if (__instance.tutorialCombat)
+                    {
+                        if (i == 0)
+                        {
+                            list = new List<string>();
+                            list.Add("fastStrike");
+                            list.Add("defend");
+                            list.Add("rend");
+                            list.Add("intercept");
+                            list.Add("intercept");
+                        }
+                        else if (i == 3)
+                        {
+                            list = new List<string>();
+                            list.Add("heal");
+                            list.Add("heal");
+                            list.Add("heal");
+                            list.Add("flash");
+                            list.Add("foresight");
+                        }
+                    }
+                    for (int j = 0; j < list.Count; j++)
+                    {
+                        if (!(Globals.Instance.GetCardData(list[j], false) == null))
+                        {
+                            string text = __instance.CreateCardInDictionary(list[j], "", false);
+                            array[i].Add(text);
+                        }
+                    }
+                }
+            }
+            System.Console.WriteLine($"[ATO GenerateDecks] Vibe check");
+            for (int k = 0; k < __instance.TeamHero.Length; k++)
+            {
+                System.Console.WriteLine($"[ATO GenerateDecks] Iteration {k + 1}");
+                if (__instance.TeamHero[k] != null)
+                {
+                    List<string> list2 = array[k].ShuffleList<string>();
+                    __instance.HeroDeck[k] = list2;
+                    if (__instance.currentRound == 0)
+                    {
+                        List<string> list3 = new List<string>();
+                        List<string> list4 = new List<string>();
+                        for (int l = __instance.HeroDeck[k].Count - 1; l >= 0; l--)
+                        {
+                            CardData cardData = __instance.GetCardData(__instance.HeroDeck[k][l]);
+                            if (cardData.Innate)
+                            {
+                                list3.Add(__instance.HeroDeck[k][l]);
+                                __instance.HeroDeck[k].RemoveAt(l);
+                            }
+                            else if (cardData.Lazy)
+                            {
+                                list4.Add(__instance.HeroDeck[k][l]);
+                                __instance.HeroDeck[k].RemoveAt(l);
+                            }
+                        }
+                        if (list3.Count > 0)
+                        {
+                            list3 = list3.ShuffleList<string>();
+                            list3.AddRange(__instance.HeroDeck[k]);
+                            __instance.HeroDeck[k] = new List<string>();
+                            __instance.HeroDeck[k].Clear();
+                            for (int m = 0; m < list3.Count; m++)
+                            {
+                                __instance.HeroDeck[k].Add(list3[m]);
+                            }
+                        }
+                        if (list4.Count > 0)
+                        {
+                            list4 = list4.ShuffleList<string>();
+                            for (int n = 0; n < list4.Count; n++)
+                            {
+                                __instance.HeroDeck[k].Add(list4[n]);
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
         }
     }
 
@@ -117,13 +217,30 @@ public class Plugin : BaseUnityPlugin
                 ref List<string>[] ___HeroDeckVanish
             ) 
         {
+            System.Console.WriteLine("Updating each Hero's owner");
+            for (int i = 0; i < 8; i++)
+            {
+                if (___TeamHero[i] != null)
+                {
+                    ___TeamHero[i].AssignOwner(NetworkManager.Instance.PlayerHeroPositionOwner[i]);
+                }
+                if (___TeamHero[i].HpCurrent <= 0)
+                {
+                    ___TeamHero[i].HpCurrent = 1;
+                }
+                if (AtOManager.Instance.heroPerks != null && AtOManager.Instance.heroPerks.ContainsKey(___TeamHero[i].SubclassName))
+                {
+                    ___TeamHero[i].PerkList = AtOManager.Instance.heroPerks[___TeamHero[i].SubclassName];
+                }
+            }
+
             Array.Resize<int>(ref ___heroLifeArr, 8);
             int num = 0;
-            System.Console.WriteLine($"[ATO GenerateHeroes] Length of teamHero: {___TeamHero.Length}");
+            //System.Console.WriteLine($"[ATO GenerateHeroes] Length of teamHero: {___TeamHero.Length}");
             Hero[] array = new Hero[___TeamHero.Length];
             for (int i = 0; i < ___TeamHero.Length; i++)
             {
-                System.Console.WriteLine($"[ATO GenerateHeroes] Iteration {i}");
+                //System.Console.WriteLine($"[ATO GenerateHeroes] Iteration {i}");
                 if (___TeamHero[i] != null && (!___tutorialCombat || (i != 1 && i != 2)))
                 {
                     Hero hero = ___TeamHero[i];
@@ -131,7 +248,7 @@ public class Plugin : BaseUnityPlugin
                     {
                         hero.HpCurrent = 1;
                     }
-                    System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 1");
+                    //System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 1");
                     if (AtOManager.Instance.combatGameCode == "" || ___teamHeroItemsFromTurnSave != null)
                     {
                         ___heroLifeArr[i] = hero.HpCurrent; //TODO: Index out of bounds
@@ -141,26 +258,26 @@ public class Plugin : BaseUnityPlugin
                         list.Add(hero.Jewelry);
                         list.Add(hero.Accesory);
                         list.Add(hero.Pet);
-                        System.Console.WriteLine($"[ATO GenerateHeroes] VIBE CHECK");
+                        //System.Console.WriteLine($"[ATO GenerateHeroes] VIBE CHECK");
                         if (!___heroBeginItems.ContainsKey(i))
                         {
-                            System.Console.WriteLine($"[ATO GenerateHeroes] ADD CHECK");
+                            //System.Console.WriteLine($"[ATO GenerateHeroes] ADD CHECK");
                             ___heroBeginItems.Add(i, list);
-                            System.Console.WriteLine($"[ATO GenerateHeroes] ADD POG");
+                            //System.Console.WriteLine($"[ATO GenerateHeroes] ADD POG");
                         }
                         else
                         {
-                            System.Console.WriteLine($"[ATO GenerateHeroes] ACCESS CHECK");
+                            //System.Console.WriteLine($"[ATO GenerateHeroes] ACCESS CHECK");
                             ___heroBeginItems[i] = list;
-                            System.Console.WriteLine($"[ATO GenerateHeroes] ACCESS POG");
+                            //System.Console.WriteLine($"[ATO GenerateHeroes] ACCESS POG");
                         }
                     }
-                    System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 2");
+                    //System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 2");
                     if (AtOManager.Instance.combatGameCode != "")
                     {
                         if (___teamHeroItemsFromTurnSave != null)
                         {
-                            System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 3");
+                            //System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 3");
                             hero.Weapon = ___teamHeroItemsFromTurnSave[i * 5];
                             hero.Armor = ___teamHeroItemsFromTurnSave[i * 5 + 1];
                             hero.Jewelry = ___teamHeroItemsFromTurnSave[i * 5 + 2];
@@ -169,7 +286,7 @@ public class Plugin : BaseUnityPlugin
                         }
                         else if (___currentRound == 0 && ___heroBeginItems != null && ___heroBeginItems.ContainsKey(i) && ___heroBeginItems[i] != null)
                         {
-                            System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 4");
+                            //System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 4");
                             List<string> list2 = ___heroBeginItems[i];
                             hero.Weapon = list2[0];
                             hero.Armor = list2[1];
@@ -179,7 +296,7 @@ public class Plugin : BaseUnityPlugin
                         }
                         else if (___currentRound > 0 && ___heroDestroyedItemsInThisTurn.ContainsKey(i))
                         {
-                            System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 5");
+                            //System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 5");
                             if (___heroDestroyedItemsInThisTurn[i].ContainsKey("weapon"))
                             {
                                 hero.Weapon = ___heroDestroyedItemsInThisTurn[i]["weapon"];
@@ -202,7 +319,7 @@ public class Plugin : BaseUnityPlugin
                             }
                         }
                     }
-                    System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 6");
+                    //System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 6");
                     hero.Alive = true;
                     hero.InternalId = MatchManager.Instance.GetRandomString("default");
                     hero.Id = hero.HeroData.HeroSubClass.Id + "_" + hero.InternalId;
@@ -211,9 +328,9 @@ public class Plugin : BaseUnityPlugin
                     gameObject.name = hero.Id;
                     ___targetTransformDict.Add(hero.Id, gameObject.transform);
                     hero.ResetDataForNewCombat(___currentGameCode == "");
-                    System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 7");
+                    //System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 7");
                     hero.SetHeroIndex(i);
-                    System.Console.WriteLine($"[ATO GenerateHeroes] vibes");
+                    //System.Console.WriteLine($"[ATO GenerateHeroes] vibes");
                     hero.HeroItem = gameObject.GetComponent<HeroItem>();
                     hero.HeroItem.HeroData = hero.HeroData;
                     hero.HeroItem.Init(hero);
@@ -229,7 +346,7 @@ public class Plugin : BaseUnityPlugin
                     ___HeroHand[i] = new List<string>();
                     ___HeroDeckDiscard[i] = new List<string>();
                     ___HeroDeckVanish[i] = new List<string>();
-                    System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 8");
+                    //System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 8");
                     array[i] = hero;
                     num++;
                     CardData pet = hero.GetPet();
@@ -547,6 +664,46 @@ public class Plugin : BaseUnityPlugin
                     ___roomSlotsImage[4 + i] = tmpImg;
                 }
             }
+        }
+    }
+
+
+    [HarmonyPatch(typeof(AtOManager), "ShareTeam")]
+    class ShareTeam
+    {
+        [HarmonyPostfix]
+        static void Postfix(AtOManager __instance, string sceneToLoad = "", bool showMask = true, bool setOwners = false)
+        {
+            System.Console.WriteLine("[ShareTeam] Postfix applied");
+            if (NetworkManager.Instance.IsMaster())
+            {
+                for (int i = 0; i < 8; i++)
+                {
+                    if (__instance.teamAtO[i] != null)
+                    {
+                        __instance.teamAtO[i].AssignOwner(NetworkManager.Instance.PlayerHeroPositionOwner[i]);
+                    }
+                    if (__instance.teamAtO[i].HpCurrent <= 0)
+                    {
+                        __instance.teamAtO[i].HpCurrent = 1;
+                    }
+                    if (__instance.heroPerks != null && __instance.heroPerks.ContainsKey(__instance.teamAtO[i].SubclassName))
+                    {
+                        __instance.teamAtO[i].PerkList = __instance.heroPerks[__instance.teamAtO[i].SubclassName];
+                    }
+                }
+            }
+        }
+    }
+
+
+    [HarmonyPatch(typeof(AtOManager), "InitCombatStats")]
+    class InitCombatStats {
+        [HarmonyPrefix]
+        static bool setpatch(AtOManager __instance) {
+            System.Console.WriteLine("[CombatStats] Update for 8 players");
+            __instance.combatStats = new int[8, 12];
+            return false;
         }
     }
 }
