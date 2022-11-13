@@ -34,5 +34,6 @@ public class Plugin : BaseUnityPlugin
         NetworkManager_Multiplayer.patch();
         HeroSelectionManager_Multiplayer.patch();
         SteamManager_Multiplayer.patch();
+        RewardsManager_Multiplayer.patch();
     }
 }

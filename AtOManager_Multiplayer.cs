@@ -26,8 +26,23 @@ class AtOManager_Multiplayer
         modInfo.harmony.PatchAll(typeof(CreateRoom));
         modInfo.harmony.PatchAll(typeof(ShareTeam));
         modInfo.harmony.PatchAll(typeof(InitCombatStats));
+        modInfo.harmony.PatchAll(typeof(GetHero));
     }
 
+    [HarmonyPatch(typeof(AtOManager), "GetHero")]
+    class GetHero {
+        [HarmonyPrefix]
+        static bool setpatch(ref Hero __result, ref AtOManager __instance, ref int index) {
+            if (index >= 0 && index < 5 && __instance.teamAtO != null && __instance.teamAtO.Length != 0)
+            {
+                __result = __instance.teamAtO[index];
+                return false;
+            }
+            __result = null;
+
+            return false;
+        }
+    }
 
     [HarmonyPatch(typeof(AtOManager), "InitCombatStats")]
     class InitCombatStats
