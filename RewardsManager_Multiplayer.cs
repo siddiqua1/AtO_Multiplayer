@@ -27,30 +27,30 @@ class RewardsManager_Multiplayer : MonoBehaviour
         modInfo.harmony.PatchAll(typeof(Awake));
         modInfo.harmony.PatchAll(typeof(Start));
         modInfo.harmony.PatchAll(typeof(SetCardReward));
-        modInfo.harmony.PatchAll(typeof(CheckAllAssigned));
+        //modInfo.harmony.PatchAll(typeof(CheckAllAssigned));
     }
 
-    [HarmonyPatch(typeof(RewardsManager), "CheckAllAssigned")]
-    class CheckAllAssigned : MonoBehaviour {
-        [HarmonyPrefix]
-        bool setpatch(RewardsManager __instance) {
-            for (int i = 0; i < __instance.numRewards; i++)
-            {
-                if (__instance.cardSelectedArr[i] == null)
-                {
-                    return false;
-                }
-            }
-            if (!GameManager.Instance.IsMultiplayer() || (GameManager.Instance.IsMultiplayer() && NetworkManager.Instance.IsMaster()))
-            {
-                __instance.finishReward = true;
-                __instance.buttonRestart.gameObject.SetActive(false);
-                base.StartCoroutine(__instance.CloseWindow());
-            }
-            SaveManager.SavePlayerData(false);
-            return false;
-        }
-    }
+    //[HarmonyPatch(typeof(RewardsManager), "CheckAllAssigned")]
+    //class CheckAllAssigned : MonoBehaviour {
+    //    [HarmonyPrefix]
+    //    bool setpatch(RewardsManager __instance) {
+    //        for (int i = 0; i < __instance.numRewards; i++)
+    //        {
+    //            if (__instance.cardSelectedArr[i] == null)
+    //            {
+    //                return false;
+    //            }
+    //        }
+    //        if (!GameManager.Instance.IsMultiplayer() || (GameManager.Instance.IsMultiplayer() && NetworkManager.Instance.IsMaster()))
+    //        {
+    //            __instance.finishReward = true;
+    //            __instance.buttonRestart.gameObject.SetActive(false);
+    //            base.StartCoroutine(__instance.CloseWindow());
+    //        }
+    //        SaveManager.SavePlayerData(false);
+    //        return false;
+    //    }
+    //}
 
     [HarmonyPatch(typeof(RewardsManager), "SetCardReward")]
     class SetCardReward {

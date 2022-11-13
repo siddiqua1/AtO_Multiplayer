@@ -33,7 +33,7 @@ class AtOManager_Multiplayer
     class GetHero {
         [HarmonyPrefix]
         static bool setpatch(ref Hero __result, ref AtOManager __instance, ref int index) {
-            if (index >= 0 && index < 5 && __instance.teamAtO != null && __instance.teamAtO.Length != 0)
+            if (index >= 0 && index < 8 && __instance.teamAtO != null && __instance.teamAtO.Length != 0)
             {
                 __result = __instance.teamAtO[index];
                 return false;
