@@ -356,19 +356,19 @@ class HeroSelectionManager_Multiplayer : MonoBehaviour
 				{
 					for (int l = 0; l < 8; l++)
 					{
-						System.Console.WriteLine($"[StartCo] get hero {l}");
+						//System.Console.WriteLine($"[StartCo] get hero {l}");
 						Hero hero = AtOManager.Instance.GetHero(l);
 						string subclassName = hero.SubclassName;
 						int perkRank = hero.PerkRank;
 						string skinUsed = hero.SkinUsed;
 						string cardbackUsed = hero.CardbackUsed;
-						System.Console.WriteLine($"[StartCo] Does my life hurt {l}");
+						//System.Console.WriteLine($"[StartCo] Does my life hurt {l}");
 						__instance.AddToPlayerHeroSkin(subclassName, skinUsed);
-						System.Console.WriteLine("[StartCo] not yet");
+						//System.Console.WriteLine("[StartCo] not yet");
 						__instance.AddToPlayerHeroCardback(subclassName, cardbackUsed);
-						System.Console.WriteLine($"[StartCo] assign to box {l}");
+						//System.Console.WriteLine($"[StartCo] assign to box {l}");
 						__instance.heroSelectionDictionary[subclassName].AssignHeroToBox(__instance.boxGO[l]);
-						System.Console.WriteLine($"[StartCo] set rank box {l}");
+						//System.Console.WriteLine($"[StartCo] set rank box {l}");
 						__instance.heroSelectionDictionary[subclassName].SetRankBox(perkRank);
 						__instance.heroSelectionDictionary[subclassName].SetSkin(skinUsed);
 						__instance.photonView.RPC("NET_AssignHeroToBox", RpcTarget.Others, new object[]
@@ -429,6 +429,7 @@ class HeroSelectionManager_Multiplayer : MonoBehaviour
 				for (int m = 0; m < 8; m++)
 				{
 					Hero hero2 = AtOManager.Instance.GetHero(m);
+					System.Console.WriteLine($"[StartCo] Original Owner {hero2.OwnerOriginal}");
 					if (hero2.OwnerOriginal == null)
 					{
 						break;

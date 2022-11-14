@@ -37,5 +37,6 @@ public class Plugin : BaseUnityPlugin
         RewardsManager_Multiplayer.patch();
         SideCharacters_Multiplayer.patch();
         MenuSaveButton_Multiplayer.patch();
+        CharacterWindowUI_Multiplayer.patch();
     }
 }

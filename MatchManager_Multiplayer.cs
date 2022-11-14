@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections;
 using System.IO;
+using System.Text;
 using BepInEx;
 using HarmonyLib;
 using UnityEngine;
@@ -24,6 +25,57 @@ class MatchManager_Multiplayer{
         modInfo.harmony.PatchAll(typeof(InitializeVars));
         modInfo.harmony.PatchAll(typeof(GenerateDecks));
         modInfo.harmony.PatchAll(typeof(GenerateHeroes));
+        //seperate file for CastCards and CardCardAction
+
+        //TODO: below are methods that have < 4 and seem relevant to change
+        //modInfo.harmony.PatchAll(typeof(CardNamesForSyncCode));
+        //FixCodeSyncFromMaster
+        //FixTOTALCo
+        //GetHero
+        //GetHeroFromId
+        //GetHeroItemsForTurnSave
+        //NET_ShareDecks
+        //NextTurnContinue
+        //PositionIsMiddle
+        //ReloadCombatFullAction
+        //SetCharactersPing
+
+    }
+
+    [HarmonyPatch(typeof(MatchManager), "CardNamesForSyncCode")]
+    class CardNamesForSyncCode {
+        [HarmonyPrefix]
+        static bool setpatch(MatchManager __instance,ref string __result)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.Append(__instance.CardDictionaryKeys());
+            for (int i = 0; i < __instance.TeamHero.Length; i++)
+            {
+                if (__instance.HeroDeck[i] != null)
+                {
+                    for (int j = 0; j < __instance.HeroDeck[i].Count; j++)
+                    {
+                        stringBuilder.Append(__instance.HeroDeck[i][j]);
+                    }
+                }
+                if (__instance.HeroDeckDiscard[i] != null)
+                {
+                    for (int k = 0; k < __instance.HeroDeckDiscard[i].Count; k++)
+                    {
+                        stringBuilder.Append(__instance.HeroDeckDiscard[i][k]);
+                    }
+                }
+                if (__instance.HeroDeckVanish[i] != null)
+                {
+                    for (int l = 0; l < __instance.HeroDeckVanish[i].Count; l++)
+                    {
+                        stringBuilder.Append(__instance.HeroDeckVanish[i][l]);
+                    }
+                }
+            }
+            __result = stringBuilder.ToString();
+            return false;
+        }
     }
 
     [HarmonyPatch(typeof(MatchManager), "InitializeVars")]
@@ -189,7 +241,7 @@ class MatchManager_Multiplayer{
                 ref List<string>[] ___HeroDeckVanish
             )
         {
-            System.Console.WriteLine("Updating each Hero's owner");
+            System.Console.WriteLine("[GenerateHeroes] Updating each Hero's owner");
             for (int i = 0; i < 8; i++)
             {
                 if (___TeamHero[i] != null)
@@ -208,11 +260,11 @@ class MatchManager_Multiplayer{
 
             Array.Resize<int>(ref ___heroLifeArr, 8);
             int num = 0;
-            //System.Console.WriteLine($"[ATO GenerateHeroes] Length of teamHero: {___TeamHero.Length}");
+            System.Console.WriteLine($"[ATO GenerateHeroes] Length of teamHero: {___TeamHero.Length}");
             Hero[] array = new Hero[___TeamHero.Length];
             for (int i = 0; i < ___TeamHero.Length; i++)
             {
-                //System.Console.WriteLine($"[ATO GenerateHeroes] Iteration {i}");
+                System.Console.WriteLine($"[ATO GenerateHeroes] Iteration {i}");
                 if (___TeamHero[i] != null && (!___tutorialCombat || (i != 1 && i != 2)))
                 {
                     Hero hero = ___TeamHero[i];
@@ -223,7 +275,7 @@ class MatchManager_Multiplayer{
                     //System.Console.WriteLine($"[ATO GenerateHeroes] FLAG 1");
                     if (AtOManager.Instance.combatGameCode == "" || ___teamHeroItemsFromTurnSave != null)
                     {
-                        ___heroLifeArr[i] = hero.HpCurrent; //TODO: Index out of bounds
+                        ___heroLifeArr[i] = hero.HpCurrent;
                         List<string> list = new List<string>();
                         list.Add(hero.Weapon);
                         list.Add(hero.Armor);
@@ -328,6 +380,7 @@ class MatchManager_Multiplayer{
                     }
                 }
             }
+            System.Console.WriteLine($"[ATO GenerateHeroes] Length of teamHero: {___TeamHero.Length}");
             ___TeamHero = new Hero[array.Length];
             for (int j = 0; j < array.Length; j++)
             {
